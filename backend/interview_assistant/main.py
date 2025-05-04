@@ -7,6 +7,18 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base
 from datetime import datetime
+import argparse
+from langchain_ollama import ChatOllama
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Chat with LLM model')
+    parser.add_argument('--model', type=str, default="qwen2.5-coder:1.5b", help='Пуьт к модели')
+    parser.add_argument('--task', type=str, help='Условие задачи')
+    return parser.parse_args()
+
+args = parse_arguments()
+model_name = args.model if args.model else 'qwen2.5-coder:32b'
+task = args.task
 
 # Initialize FastAPI app
 app = FastAPI(title="Interview Assistant Backend")
@@ -35,8 +47,8 @@ class InterviewData(Base):
     programming_language = Column(String)
     prompt = Column(String)
     html_path = Column(String)
-    screenshot_path = Column(String)
-    voice_path = Column(String, nullable=True)
+    # screenshot_path = Column(String)
+    # voice_path = Column(String, nullable=True)
     llm_response = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -68,22 +80,22 @@ async def upload_data(
             f.write(html_code)
     
         # Save screenshot (if provided)
-        screenshot_path = None
-        if screenshot:
-            if not screenshot.content_type.startswith("image/"):
-                raise HTTPException(status_code=400, detail="Screenshot must be an image")
-            screenshot_path = os.path.join(session_dir, screenshot.filename)
-            with open(screenshot_path, "wb") as f:
-                f.write(await screenshot.read())
+        # screenshot_path = None
+        # if screenshot:
+        #     if not screenshot.content_type.startswith("image/"):
+        #         raise HTTPException(status_code=400, detail="Screenshot must be an image")
+        #     screenshot_path = os.path.join(session_dir, screenshot.filename)
+        #     with open(screenshot_path, "wb") as f:
+        #         f.write(await screenshot.read())
 
         # Save voice recording (if provided)
-        voice_path = None
-        if voice_recording:
-            if not voice_recording.content_type.startswith("audio/"):
-                raise HTTPException(status_code=400, detail="Voice recording must be an audio file")
-            voice_path = os.path.join(session_dir, voice_recording.filename)
-            with open(voice_path, "wb") as f:
-                f.write(await voice_recording.read())
+        # voice_path = None
+        # if voice_recording:
+        #     if not voice_recording.content_type.startswith("audio/"):
+        #         raise HTTPException(status_code=400, detail="Voice recording must be an audio file")
+        #     voice_path = os.path.join(session_dir, voice_recording.filename)
+        #     with open(voice_path, "wb") as f:
+        #         f.write(await voice_recording.read())
 
         # Run inference with local LLM (using Ollama)
         llm_response = None
@@ -95,11 +107,22 @@ async def upload_data(
             HTML Code: {html_code}
             """
             # Call the local LLM (e.g., gemma2:2b)
-            response = ollama.generate(
-                model="qwen2.5-coder:32b",
-                prompt=llm_input,
+            llm = ChatOllama(
+                model=args.model,
+                temperature=0,
             )
-            llm_response = response["response"]
+            messages = [
+                        (
+                            "system",
+                            f"""
+                                Prompt: {prompt}
+                                Programming Language: {programming_language}
+                                HTML Code: {html_code}
+                            """
+                        ),
+                        ("human", args.task),
+                    ]
+            llm_response = llm.invoke(messages)
         except Exception as e:
             llm_response = f"Error running LLM: {str(e)}"
 
@@ -111,8 +134,8 @@ async def upload_data(
                 programming_language=programming_language,
                 prompt=prompt,
                 html_path=html_path,
-                screenshot_path=screenshot_path,
-                voice_path=voice_path,
+                # screenshot_path=screenshot_path,
+                # voice_path=voice_path,
                 llm_response=llm_response
             )
             db.add(db_data)
