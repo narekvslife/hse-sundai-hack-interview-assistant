@@ -69,10 +69,21 @@ async def upload_data(
         except Exception as e:
             llm_response = f"Error running LLM: {str(e)}"
 
+        # Check if llm_response is an error string or the expected object
+        response_content = None
+        if isinstance(llm_response, str): # It's an error string
+            response_content = llm_response
+            message = "Data uploaded but LLM processing failed"
+        elif llm_response: # It's likely the AIMessage object
+            response_content = llm_response.content
+            message = "Data uploaded and LLM processed successfully"
+        else: # Should not happen if LLM call was attempted, but handle just in case
+            message = "Data uploaded, but no LLM response generated"
+
         return UploadResponse(
             session_id=session_id,
-            message="Data uploaded and LLM processed successfully",
-            llm_response=llm_response.content
+            message=message, # Use the updated message
+            llm_response=response_content, # Use the extracted content or error string
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing upload: {str(e)}")
