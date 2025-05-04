@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Interview Assistant Backend API
-  description: API for an interview assistant extension that accepts HTML code, screenshots, programming language, prompts, and optional voice recordings, processes them with a local LLM, and returns the results.
-  version: 1.0.0
+  description: API for an interview assistant extension that accepts HTML code, screenshots, programming language, prompts, and optional voice recordings, processes them with a local LLM (via Ollama), and returns the results.
+  version: 1.0.1
 servers:
   - url: http://127.0.0.1:8000
     description: Local development server
@@ -26,7 +26,7 @@ paths:
   /upload:
     post:
       summary: Upload data and process with LLM
-      description: Accepts HTML code, an optional screenshot, programming language, and an optional voice recording. Stores the data, processes text inputs with a local LLM, and returns the session ID and LLM response.
+      description: Accepts multipart form data with HTML code, a screenshot (image file), programming language, prompt, and an optional voice recording (audio file). Stores the data, processes text inputs with a local LLM, and returns a session ID, status message, and LLM response.
       operationId: uploadData
       requestBody:
         required: true
@@ -40,24 +40,12 @@ paths:
               properties:
                 html_code:
                   type: string
-                  description: HTML code of the page
-                  example: "<html><body>Test</body></html>"
-                screenshot:
-                  type: string
-                  format: binary
-                  description: Screenshot image file (e.g., PNG, JPEG)
+                  description: HTML code of the page as a string.
+                  example: "<html><body><h1>Test Page</h1></body></html>"
                 programming_language:
                   type: string
-                  description: Programming language used (e.g., Python, JavaScript)
-                  example: Python
-                prompt:
-                  type: string
-                  description: Prompt for the LLM
-                  example: Write a function
-                voice_recording:
-                  type: string
-                  format: binary
-                  description: Optional voice recording file (e.g., MP3, WAV)
+                  description: Programming language used (e.g., Python, JavaScript).
+                  example: python
       responses:
         '200':
           description: Successful upload and LLM processing
@@ -72,19 +60,19 @@ paths:
                   session_id:
                     type: string
                     format: uuid
-                    description: Unique MySQL UUID for the uploaded data
+                    description: Unique UUID for the uploaded data session.
                     example: 550e8400-e29b-41d4-a716-446655440000
                   message:
                     type: string
-                    description: Status message
+                    description: Status message indicating success.
                     example: Data uploaded and LLM processed successfully
                   llm_response:
                     type: string
                     nullable: true
-                    description: Response from the local LLM or error message
-                    example: Generated code for the function...
+                    description: Response from the local LLM (e.g., generated text) or an error message if LLM processing fails.
+                    example: Here is a function to reverse a string...
         '400':
-          description: Bad request (e.g., invalid file type)
+          description: Bad request (e.g., invalid file type for screenshot or voice recording)
           content:
             application/json:
               schema:
@@ -94,7 +82,7 @@ paths:
                     type: string
                     example: Screenshot must be an image
         '500':
-          description: Server error
+          description: Server error (e.g., file system or database issues)
           content:
             application/json:
               schema:

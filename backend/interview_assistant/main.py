@@ -10,15 +10,30 @@ from datetime import datetime
 import argparse
 from langchain_ollama import ChatOllama
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Chat with LLM model')
-    parser.add_argument('--model', type=str, default="qwen2.5-coder:1.5b", help='Пуьт к модели')
-    parser.add_argument('--task', type=str, help='Условие задачи')
-    return parser.parse_args()
+# def parse_arguments():
+#     parser = argparse.ArgumentParser(description='Chat with LLM model')
+#     parser.add_argument('--model', type=str, default="qwen2.5-coder:1.5b", help='Пуьт к модели')
+#     parser.add_argument('--task', type=str, default = ,
+#  help='Условие задачи')
+#     return parser.parse_args()
 
-args = parse_arguments()
-model_name = args.model if args.model else 'qwen2.5-coder:32b'
-task = args.task
+# args = parse_arguments()
+model_name = 'qwen2.5-coder:32b'
+task = '''В один из жарких летних дней Петя и его друг Вася решили купить арбуз. Они выбрали самый большой и самый спелый, на их взгляд. После недолгой процедуры взвешивания весы показали w килограмм. Поспешно прибежав домой, изнемогая от жажды, ребята начали делить приобретенную ягоду, однако перед ними встала нелегкая задача. Петя и Вася являются большими поклонниками четных чисел, поэтому хотят поделить арбуз так, чтобы доля каждого весила именно четное число килограмм, при этом не обязательно, чтобы доли были равными по величине. Ребята очень сильно устали и хотят скорее приступить к трапезе, поэтому Вы должны подсказать им, удастся ли поделить арбуз, учитывая их пожелание. Разумеется, каждому должен достаться кусок положительного веса.
+
+Входные данные
+В первой и единственной строке входных данных записано целое число w (1 ≤ w ≤ 100) — вес купленного ребятами арбуза.
+
+Выходные данные
+Выведите YES, если ребята смогут поделить арбуз на две части, каждая из которых весит четное число килограмм, и NO в противном случае.
+
+Примеры
+Входные данныеСкопировать
+8
+Выходные данныеСкопировать
+YES
+Примечание
+Например, ребята могут поделить арбуз на две части размерами 2 и 6 килограммов соответственно (другой вариант — две части 4 и 4 килограмма).'''
 
 # Initialize FastAPI app
 app = FastAPI(title="Interview Assistant Backend")
@@ -108,7 +123,7 @@ async def upload_data(
             """
             # Call the local LLM (e.g., gemma2:2b)
             llm = ChatOllama(
-                model=args.model,
+                model=model,
                 temperature=0,
             )
             messages = [
@@ -116,13 +131,13 @@ async def upload_data(
                             "system",
                             f"""
                                 Prompt: {prompt}
-                                Programming Language: {programming_language}
-                                HTML Code: {html_code}
-                            """
-                        ),
-                        ("human", args.task),
+                                Programming Language: {programming_language}"""
+                            ),
+                        ("human", task),
                     ]
+            # print('star')
             llm_response = llm.invoke(messages)
+            # print('end')
         except Exception as e:
             llm_response = f"Error running LLM: {str(e)}"
 
@@ -142,7 +157,8 @@ async def upload_data(
             db.commit()
         finally:
             db.close()
-
+        
+        print(llm_input)
         return UploadResponse(
             session_id=session_id,
             message="Data uploaded and LLM processed successfully",
