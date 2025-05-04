@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const solutionDisplay = document.getElementById('solution-display');
   const copyButton = document.getElementById('copy-btn');
   const regenerateButton = document.getElementById('regenerate-btn');
+  const container = document.querySelector('.container');
   
   // Current selected language (default: JavaScript)
   let currentLanguage = 'js';
@@ -115,24 +116,61 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Store language preference
   function savePreference() {
-    chrome.storage.sync.set({ preferredLanguage: currentLanguage });
+    if (chrome && chrome.storage) {
+      chrome.storage.sync.set({ preferredLanguage: currentLanguage });
+    }
   }
   
   // Load language preference if available
-  chrome.storage.sync.get('preferredLanguage', function(data) {
-    if (data.preferredLanguage) {
-      currentLanguage = data.preferredLanguage;
+  if (chrome && chrome.storage) {
+    chrome.storage.sync.get('preferredLanguage', function(data) {
+      if (data.preferredLanguage) {
+        currentLanguage = data.preferredLanguage;
+        
+        // Update UI
+        languageButtons.forEach(btn => {
+          if (btn.id === currentLanguage) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+        
+        updateSolution(currentLanguage);
+      }
+    });
+  }
+  
+  // Add event listener for key presses - replace the existing one
+  document.addEventListener('keydown', handleKeyPress);
+  
+  // Also add it to the solution display element for more reliable capture
+  solutionDisplay.addEventListener('keydown', handleKeyPress);
+  
+  // And to the container element
+  container.addEventListener('keydown', handleKeyPress);
+  
+  function handleKeyPress(event) {
+    console.log('Key pressed:', event.key, 'Ctrl key:', event.ctrlKey);
+    
+    // Check if 'a' key is pressed
+    if (event.ctrlKey || event.key === 'Control') {
+      // Generate a random color
+      const randomColor = getRandomColor();
+      console.log('Changing color to:', randomColor);
       
-      // Update UI
-      languageButtons.forEach(btn => {
-        if (btn.id === currentLanguage) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-      });
-      
-      updateSolution(currentLanguage);
+      // Apply the random color to the solution text
+      solutionDisplay.style.color = randomColor;
     }
-  });
+  }
+  
+  // Function to generate a random color
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
 }); 
