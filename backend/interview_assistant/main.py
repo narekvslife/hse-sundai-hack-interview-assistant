@@ -59,7 +59,6 @@ async def upload_data(
         except Exception as e:
             llm_response = f"Error running LLM: {str(e)}"
 
-        print(llm_response)
         return UploadResponse(
             session_id=session_id,
             message="Data uploaded and LLM processed successfully",

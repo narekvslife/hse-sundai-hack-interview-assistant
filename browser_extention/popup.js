@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const copyButton = document.getElementById('copy-btn');
   const regenerateButton = document.getElementById('regenerate-btn');
   const container = document.querySelector('.container');
+  const problemTextArea = document.getElementById('problem-text');
   
   // Current selected language (default: JavaScript)
   let currentLanguage = 'js';
@@ -67,6 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update current language
       currentLanguage = this.id;
       
+      // Save the preference
+      savePreference();
+      
       // Update solution display
       updateSolution(currentLanguage);
     });
@@ -88,30 +92,69 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
   
-  // Regenerate solution (in a real app, this would call your solution generation service)
+  // Regenerate solution
   regenerateButton.addEventListener('click', function() {
-    // Add animation to show processing
-    solutionDisplay.classList.add('processing');
-    
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // TODO: Call your solution generation API here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // In a real implementation, this would be replaced with actual API call
-      updateSolution(currentLanguage);
-      solutionDisplay.classList.remove('processing');
-    }, 1000);
+    // Call the updateSolution function to fetch from API
+    updateSolution(currentLanguage);
   });
   
   // Function to update solution based on language
   function updateSolution(language) {
-    solutionDisplay.textContent = sampleSolutions[language] || '// No solution available';
+    // Show loading state
+    solutionDisplay.classList.add('processing');
+    solutionDisplay.textContent = 'Generating solution...';
     
-    // Update the comment style based on language
-    if (language === 'js' || language === 'java' || language === 'cpp') {
-      solutionDisplay.className = 'code-display ' + language;
-    } else if (language === 'python') {
-      solutionDisplay.className = 'code-display python';
-    }
+    // Map language ID to proper language name for the API
+    const languageMap = {
+      'js': 'javascript',
+      'python': 'python',
+      'java': 'java',
+      'cpp': 'c++'
+    };
+    
+    const apiLanguage = languageMap[language] || language;
+    
+    // Create form data for the API request
+    const formData = new FormData();
+    // Get the problem text from the textarea
+    const problemText = problemTextArea.value.trim() || 'Two Sum: Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.';
+    formData.append('task', problemText);
+    formData.append('programming_language', apiLanguage);
+    
+    // Make API call to the backend
+    fetch('http://84.252.131.206:8000/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Update the solution with the LLM response
+      solutionDisplay.textContent = data.llm_response || '// No solution available';
+      
+      // Update the comment style based on language
+      if (language === 'js' || language === 'java' || language === 'cpp') {
+        solutionDisplay.className = 'code-display ' + language;
+      } else if (language === 'python') {
+        solutionDisplay.className = 'code-display python';
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching solution:', error);
+      solutionDisplay.textContent = '// Error: Could not generate solution. Using fallback.';
+      // Fallback to sample solutions if API call fails
+      if (sampleSolutions[language]) {
+        solutionDisplay.textContent = sampleSolutions[language];
+      }
+    })
+    .finally(() => {
+      // Remove loading state
+      solutionDisplay.classList.remove('processing');
+    });
   }
   
   // Store language preference
