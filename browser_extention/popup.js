@@ -2,17 +2,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // Elements
   const languageButtons = document.querySelectorAll('.lang-btn');
   const solutionDisplay = document.getElementById('solution-display');
-  const copyButton = document.getElementById('copy-btn');
-  const regenerateButton = document.getElementById('regenerate-btn');
+  // const copyButton = document.getElementById('copy-btn');
+  // const regenerateButton = document.getElementById('regenerate-btn');
   const container = document.querySelector('.container');
   const problemTextArea = document.getElementById('problem-text');
   
   // Current selected language (default: JavaScript)
-  let currentLanguage = 'js';
-  
-  // Initialize with JavaScript solution
-  updateSolution(currentLanguage);
-  
+  let currentLanguage = 'python';
+
   // Language selection
   languageButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -25,32 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Save the preference
       savePreference();
-      
-      // Update solution display
-      updateSolution(currentLanguage);
     });
-  });
-  
-  // Copy solution to clipboard
-  copyButton.addEventListener('click', function() {
-    navigator.clipboard.writeText(solutionDisplay.textContent)
-      .then(() => {
-        // Visual feedback
-        const originalText = copyButton.textContent;
-        copyButton.textContent = 'Copied!';
-        setTimeout(() => {
-          copyButton.textContent = originalText;
-        }, 1500);
-      })
-      .catch(err => {
-        console.error('Failed to copy: ', err);
-      });
-  });
-  
-  // Regenerate solution
-  regenerateButton.addEventListener('click', function() {
-    // Call the updateSolution function to fetch from API
-    updateSolution(currentLanguage);
   });
   
   // Function to update solution based on language
@@ -92,11 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
       solutionDisplay.textContent = data.llm_response || '// No solution available';
       
       // Update the comment style based on language
-      if (language === 'js' || language === 'java' || language === 'cpp') {
-        solutionDisplay.className = 'code-display ' + language;
-      } else if (language === 'python') {
-        solutionDisplay.className = 'code-display python';
-      }
+      solutionDisplay.className = 'code-display python';
     })
     .finally(() => {
       // Remove loading state
@@ -125,8 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.remove('selected');
           }
         });
-        
-        updateSolution(currentLanguage);
       }
     });
   }
@@ -146,21 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if 'a' key is pressed
     if (event.ctrlKey || event.key === 'Control') {
       // Generate a random color
-      const randomColor = getRandomColor();
-      console.log('Changing color to:', randomColor);
-      
-      // Apply the random color to the solution text
-      solutionDisplay.style.color = randomColor;
+      updateSolution(currentLanguage);
     }
   }
-  
-  // Function to generate a random color
-  function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
+
 }); 
