@@ -31,50 +31,82 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Function to update solution based on language and page HTML
-  function updateSolution(language, pageHTML) {
+  async function updateSolution(language, pageHTML) {
     // Show loading state
     solutionDisplay.classList.add('processing');
+    solutionDisplay.textContent = '';
     solutionDisplay.textContent = 'Generating solution...';
     
     const apiLanguage = language;
     
     // Create form data for the API request
     const formData = new FormData();
-    // Get the problem text from the textarea
-    // const problemText = problemTextArea.value.trim() || 'No solution';
     formData.append('task', pageHTML);
     formData.append('programming_language', apiLanguage);
     
     // Make API call to the backend
-    fetch('http://84.252.131.206:8000/upload', {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json'
-      },
-      body: formData
-    })
-    .then(response => {
+    try {
+      const response = await fetch('http://84.252.131.206:8000/upload', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Accept': 'text/plain'
+        },
+        body: formData
+      });
+
       console.log("Status:", response.status, "Status Text:", response.statusText);
+
       if (!response.ok) {
-        return response.text().then(text => {
-          console.error("Error details:", text);
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        });
+        const errorText = await response.text();
+        console.error("Error details:", errorText);
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      return response.json();
-    })
-    .then(data => {
-      // Update the solution with the LLM response
-      solutionDisplay.textContent = data.llm_response || '// No solution available';
+
+      // Check for streaming response
+      if (!response.body) {
+        throw new Error("ReadableStream not available.");
+      }
+
+      // Read the stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let receivedText = '';
+      let firstChunk = true;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        const chunkText = decoder.decode(value, { stream: true });
+        receivedText += chunkText;
+
+        if (firstChunk) {
+          // Clear the 'Generating...' message on first chunk
+          solutionDisplay.textContent = '';
+          firstChunk = false;
+        }
+
+        // Update the display incrementally
+        solutionDisplay.textContent = receivedText;
+
+        // Optional: Add syntax highlighting class here if needed later
+        solutionDisplay.className = 'code-display python'; 
+      }
       
-      // Update the comment style based on language
-      solutionDisplay.className = 'code-display python';
-    })
-    .finally(() => {
+      // Handle case where stream completes but is empty
+      if (firstChunk) {
+        solutionDisplay.textContent = '// No solution generated.';
+      }
+
+    } catch (error) {
+      console.error('Fetch error:', error);
+      solutionDisplay.textContent = `Error generating solution: ${error.message}`;
+    } finally {
       // Remove loading state
       solutionDisplay.classList.remove('processing');
-    });
+    }
   }
   
   // Function to get page HTML and then call updateSolution
