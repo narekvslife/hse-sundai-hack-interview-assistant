@@ -31,7 +31,7 @@ class LLMService:
             )
             
             messages = [
-                ("system", llm_input_system),
+                ("system", "FROM THIS HTML EXTRACT THE PROGRAMMING PROBLEM FROM CODEFORCES AND SOLVE IT USING {programming_language} FAST AND CORRECTLY OTHERWISE YOU WILL BE FIRED"),
                 ("human", task or ""),
             ]
             
