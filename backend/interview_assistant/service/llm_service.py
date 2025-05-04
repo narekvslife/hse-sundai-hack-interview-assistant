@@ -1,7 +1,7 @@
 from langchain_ollama import ChatOllama
 from ..core.config import MODEL_NAME, MODEL_TEMPERATURE, PROMPT_TEXT
 from typing import Tuple, Optional
-
+from langchain_core.messages import SystemMessage, HumanMessage
 class LLMService:
     """Сервис для работы с языковой моделью"""
     
@@ -18,26 +18,24 @@ class LLMService:
             Tuple[str, Optional[str]]: Сообщение о статусе и ответ от LLM
         """
         try:
-            # Подготовка входных данных для LLM
-            llm_input_system = f"""
-            Prompt: {PROMPT_TEXT}
-            Programming Language: {programming_language}
-            """
-            
-            # Вызов локальной LLM
             llm = ChatOllama(
                 model=MODEL_NAME,
                 temperature=MODEL_TEMPERATURE,
             )
-            
-            messages = [
-                ("system", "FROM THIS HTML EXTRACT THE PROGRAMMING PROBLEM FROM CODEFORCES AND SOLVE IT USING {programming_language} FAST AND CORRECTLY OTHERWISE YOU WILL BE FIRED"),
-                ("human", task or ""),
-            ]
-            
-            # Получение ответа от LLM
-            llm_response = llm.invoke(messages)
-            
+
+            prompt_parse = "FROM THIS HTML EXTRACT THE part with the PROGRAMMING PROBLEM FROM CODEFORCES"
+
+            llm_response_parsed = llm.invoke([SystemMessage(content=prompt_parse), HumanMessage(content=task)])
+
+            prompt_solve = f"""SOLVE the following problem USING {programming_language} FAST AND CORRECTLY OTHERWISE YOU WILL BE FIRED:
+
+            {llm_response_parsed.content}
+
+            return only the code in the {programming_language} language
+            """
+
+            llm_response = llm.invoke([SystemMessage(content=prompt_solve), HumanMessage(content=llm_response_parsed)])
+
             if llm_response:
                 return "Data uploaded and LLM processed successfully", llm_response.content
             else:
