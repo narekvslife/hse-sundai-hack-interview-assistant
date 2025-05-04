@@ -16,7 +16,6 @@ load_dotenv()
 class State(MessagesState):
     initial_text: str = Field(default="")
 
-
 def build_agent_graph(self):
 
     ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
@@ -47,7 +46,7 @@ def build_agent_graph(self):
     graph_definition.add_node("solve_problem_node", solve_problem)
 
     graph_definition.add_edge(START, "extract_problem_description_node")
-    graph_definition.add_conditional_edges("extract_problem_description_node", solve_problem)
+    graph_definition.add_edge("extract_problem_description_node", "solve_problem_node")
     graph_definition.add_edge("solve_problem_node", END)
 
     return graph_definition
