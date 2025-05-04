@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Current selected language (default: JavaScript)
   let currentLanguage = 'python';
 
+  // Function to be injected into the active tab to get HTML
+  function getContentScript() {
+    return document.documentElement.outerHTML;
+  }
+
   // Language selection
   languageButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -25,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Function to update solution based on language
-  function updateSolution(language) {
+  // Function to update solution based on language and page HTML
+  function updateSolution(language, pageHTML) {
     // Show loading state
     solutionDisplay.classList.add('processing');
     solutionDisplay.textContent = 'Generating solution...';
@@ -36,8 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create form data for the API request
     const formData = new FormData();
     // Get the problem text from the textarea
-    const problemText = problemTextArea.value.trim() || 'No solution';
-    formData.append('task', problemText);
+    // const problemText = problemTextArea.value.trim() || 'No solution';
+    formData.append('task', pageHTML);
     formData.append('programming_language', apiLanguage);
     
     // Make API call to the backend
@@ -70,6 +75,47 @@ document.addEventListener('DOMContentLoaded', function() {
       // Remove loading state
       solutionDisplay.classList.remove('processing');
     });
+  }
+  
+  // Function to get page HTML and then call updateSolution
+  function getPageHTMLAndSolve(language) {
+    if (chrome && chrome.tabs && chrome.scripting) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (tabs.length === 0) {
+          console.error("No active tab found.");
+          solutionDisplay.textContent = 'Error: Could not find active tab.';
+          return;
+        }
+        const tabId = tabs[0].id;
+        
+        chrome.scripting.executeScript(
+          {
+            target: { tabId: tabId },
+            func: getContentScript,
+          },
+          (injectionResults) => {
+            if (chrome.runtime.lastError) {
+              console.error("Script injection failed: ", chrome.runtime.lastError.message);
+              solutionDisplay.textContent = `Error: Could not access page content (${chrome.runtime.lastError.message}). Try reloading the page or the extension.`;
+              solutionDisplay.classList.remove('processing');
+              return;
+            }
+            
+            if (injectionResults && injectionResults.length > 0 && injectionResults[0].result) {
+              const pageHTML = injectionResults[0].result;
+              updateSolution(language, pageHTML); // Call updateSolution with the HTML
+            } else {
+              console.error("Failed to get page HTML. Injection result:", injectionResults);
+              solutionDisplay.textContent = 'Error: Could not retrieve page content.';
+              solutionDisplay.classList.remove('processing');
+            }
+          }
+        );
+      });
+    } else {
+      console.error("Chrome APIs (tabs or scripting) not available.");
+      solutionDisplay.textContent = 'Error: Chrome APIs not available.';
+    }
   }
   
   // Store language preference
@@ -112,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if 'a' key is pressed
     if (event.ctrlKey || event.key === 'Control') {
       // Generate a random color
-      updateSolution(currentLanguage);
+      getPageHTMLAndSolve(currentLanguage); // Call the new function
     }
   }
 

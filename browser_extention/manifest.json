@@ -11,5 +11,5 @@
       "128": "images/icon128.png"
     }
   },
-  "permissions": ["storage", "http://84.252.131.206:8000/*"]
+  "permissions": ["storage", "scripting", "activeTab"]
 } 
