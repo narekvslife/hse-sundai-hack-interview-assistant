@@ -71,18 +71,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make API call to the backend
     fetch('http://84.252.131.206:8000/upload', {
       method: 'POST',
-      body: formData,
+      mode: 'cors',
       headers: {
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       },
-      mode: 'no-cors'
+      body: formData
     })
     .then(response => {
+      console.log("Status:", response.status, "Status Text:", response.statusText);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        return response.text().then(text => {
+          console.error("Error details:", text);
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        });
       }
-      console.log("response was ok ");
-      console.log(response);
       return response.json();
     })
     .then(data => {
@@ -95,11 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (language === 'python') {
         solutionDisplay.className = 'code-display python';
       }
-    })
-    .catch(error => {
-      console.error('Error fetching solution:', error);
-      solutionDisplay.textContent = '// Error: Could not generate solution. Using fallback.';
-      // Fallback to sample solutions if API call fails
     })
     .finally(() => {
       // Remove loading state
