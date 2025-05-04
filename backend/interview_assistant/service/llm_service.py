@@ -1,5 +1,5 @@
 from langchain_ollama import ChatOllama
-from app.core.config import MODEL_NAME, MODEL_TEMPERATURE, PROMPT_TEXT
+from ..core.config import MODEL_NAME, MODEL_TEMPERATURE, PROMPT_TEXT
 from typing import Tuple, Optional
 
 class LLMService:

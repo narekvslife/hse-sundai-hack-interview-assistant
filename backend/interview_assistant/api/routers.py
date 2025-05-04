@@ -2,8 +2,8 @@ import uuid
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.core.models import UploadResponse
-from app.services.llm_service import LLMService
+from ..core.model import UploadResponse
+from ..service.llm_service import LLMService
 
 router = APIRouter()
 

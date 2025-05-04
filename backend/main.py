@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import (
+from interview_assistant.core.config import (
     APP_TITLE,
     CORS_ORIGINS,
     CORS_ALLOW_CREDENTIALS,
     CORS_ALLOW_METHODS,
     CORS_ALLOW_HEADERS
 )
-from app.api.routes import router
+from interview_assistant.api.routers import router
 
 def create_application() -> FastAPI:
     """
@@ -36,3 +36,10 @@ def create_application() -> FastAPI:
 
 # Создание приложения
 app = create_application()
+
+def run():
+     import uvicorn
+     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+     
+if __name__ == "__main__":
+    run()
