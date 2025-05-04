@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Simulate API call with timeout
     setTimeout(() => {
+      // TODO: Call your solution generation API here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       // In a real implementation, this would be replaced with actual API call
       updateSolution(currentLanguage);
       solutionDisplay.classList.remove('processing');
