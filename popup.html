@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interview Coding Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Interview Coding Assistant</h1>
+    
+    <div class="language-selector">
+      <label for="language">Select Language:</label>
+      <div class="button-group">
+        <button id="js" class="lang-btn selected">JavaScript</button>
+        <button id="python" class="lang-btn">Python</button>
+        <button id="java" class="lang-btn">Java</button>
+        <button id="cpp" class="lang-btn">C++</button>
+      </div>
+    </div>
+    
+    <div class="solution-container">
+      <h2>Solution</h2>
+      <pre id="solution-display" class="code-display">// Your solution will appear here</pre>
+    </div>
+    
+    <div class="controls">
+      <button id="copy-btn">Copy Solution</button>
+      <button id="regenerate-btn">Regenerate Solution</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 
