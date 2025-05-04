@@ -1,0 +1,107 @@
+openapi: 3.0.3
+info:
+  title: Interview Assistant Backend API
+  description: API for an interview assistant extension that accepts HTML code, screenshots, programming language, prompts, and optional voice recordings, processes them with a local LLM, and returns the results.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development server
+paths:
+  /:
+    get:
+      summary: Health check
+      description: Returns a simple message to confirm the backend is running.
+      operationId: getRoot
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Interview Assistant Backend is running
+  /upload:
+    post:
+      summary: Upload data and process with LLM
+      description: Accepts HTML code, an optional screenshot, programming language, and an optional voice recording. Stores the data, processes text inputs with a local LLM, and returns the session ID and LLM response.
+      operationId: uploadData
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - html_code
+                - programming_language
+              properties:
+                html_code:
+                  type: string
+                  description: HTML code of the page
+                  example: "<html><body>Test</body></html>"
+                screenshot:
+                  type: string
+                  format: binary
+                  description: Screenshot image file (e.g., PNG, JPEG)
+                programming_language:
+                  type: string
+                  description: Programming language used (e.g., Python, JavaScript)
+                  example: Python
+                prompt:
+                  type: string
+                  description: Prompt for the LLM
+                  example: Write a function
+                voice_recording:
+                  type: string
+                  format: binary
+                  description: Optional voice recording file (e.g., MP3, WAV)
+      responses:
+        '200':
+          description: Successful upload and LLM processing
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - session_id
+                  - message
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: Unique MySQL UUID for the uploaded data
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                  message:
+                    type: string
+                    description: Status message
+                    example: Data uploaded and LLM processed successfully
+                  llm_response:
+                    type: string
+                    nullable: true
+                    description: Response from the local LLM or error message
+                    example: Generated code for the function...
+        '400':
+          description: Bad request (e.g., invalid file type)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Screenshot must be an image
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Error processing upload
+components:
+  schemas: {}
