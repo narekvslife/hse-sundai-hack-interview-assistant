@@ -1,65 +1,80 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
+  background-color: #2b2b2b; /* Dark grey background */
+  color: #f0f0f0; /* Light grey text */
+  width: 400px; /* Increased width for better layout */
+  padding: 15px;
 }
 
 .container {
-  width: 500px;
+  background-color: #3c3c3c; /* Slightly lighter dark grey */
   padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px; /* More rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Spacing between elements */
 }
 
 h1 {
-  color: #333;
-  font-size: 22px;
+  color: #00aaff; /* Blue accent for the header */
+  text-align: center;
   margin-top: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  margin-bottom: 15px;
+  font-size: 1.6em; /* Slightly larger heading */
 }
 
 h2 {
-  color: #444;
-  font-size: 18px;
-  margin-top: 15px;
+  color: #cccccc; /* Lighter grey for subheadings */
+  border-bottom: 1px solid #555;
+  padding-bottom: 8px;
+  margin-top: 0;
+  font-size: 1.3em;
 }
 
 .language-selector {
-  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between label and buttons */
 }
 
 .language-selector label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: bold;
+  color: #cccccc;
 }
 
 .button-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 8px; /* Space between buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap */
 }
 
 .lang-btn {
-  padding: 8px 15px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background-color: #555; /* Darker button background */
+  color: #f0f0f0;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px; /* Very rounded corners */
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.1s ease; /* Smooth transitions */
+  font-size: 0.9em;
 }
 
 .lang-btn:hover {
-  background-color: #e8e8e8;
+  background-color: #666; /* Slightly lighter on hover */
+  transform: translateY(-1px); /* Subtle lift effect */
 }
 
 .lang-btn.selected {
-  background-color: #4285f4;
+  background-color: #007bff; /* Blue for selected */
   color: white;
-  border-color: #3367d6;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+.lang-btn:active {
+    transform: translateY(0); /* Remove lift effect on click */
 }
 
 .problem-input {
@@ -85,21 +100,23 @@ h2 {
 }
 
 .solution-container {
-  margin: 15px 0;
+  background-color: #444; /* Slightly different dark shade */
+  padding: 15px;
+  border-radius: 8px;
 }
 
 .code-display {
-  background-color: #282c34;
-  color: #abb2bf;
+  background-color: #2b2b2b; /* Match body background */
+  color: #d4d4d4; /* Standard code text color */
   padding: 15px;
-  border-radius: 4px;
-  overflow-x: auto;
-  font-family: 'Consolas', 'Courier New', monospace;
-  min-height: 200px;
-  max-height: 400px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  margin: 0;
+  border-radius: 8px;
+  overflow-x: auto; /* Handle long lines of code */
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.95em;
+  min-height: 100px; /* Ensure it has some height */
+  white-space: pre-wrap; /* Wrap text */
+  word-wrap: break-word; /* Break long words */
+  border: 1px solid #555; /* Subtle border */
 }
 
 .controls {
@@ -141,39 +158,9 @@ h2 {
 
 /* Processing animation */
 .code-display.processing {
-  position: relative;
-}
-
-.code-display.processing::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.code-display.processing::before {
-  content: "Generating solution...";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  z-index: 10;
-  font-size: 16px;
-  font-weight: bold;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
 }
 
 /* Language-specific syntax highlighting styles */
