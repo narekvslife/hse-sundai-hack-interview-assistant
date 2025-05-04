@@ -10,51 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Current selected language (default: JavaScript)
   let currentLanguage = 'js';
   
-  // Sample solutions for demo purposes
-  const sampleSolutions = {
-    js: `function twoSum(nums, target) {
-  const map = new Map();
-  for (let i = 0; i < nums.length; i++) {
-    const complement = target - nums[i];
-    if (map.has(complement)) {
-      return [map.get(complement), i];
-    }
-    map.set(nums[i], i);
-  }
-  return [];
-}`,
-    python: `def two_sum(nums, target):
-    seen = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in seen:
-            return [seen[complement], i]
-        seen[num] = i
-    return []`,
-    java: `public int[] twoSum(int[] nums, int target) {
-    Map<Integer, Integer> map = new HashMap<>();
-    for (int i = 0; i < nums.length; i++) {
-        int complement = target - nums[i];
-        if (map.containsKey(complement)) {
-            return new int[] { map.get(complement), i };
-        }
-        map.put(nums[i], i);
-    }
-    return new int[0];
-}`,
-    cpp: `vector<int> twoSum(vector<int>& nums, int target) {
-    unordered_map<int, int> map;
-    for (int i = 0; i < nums.size(); i++) {
-        int complement = target - nums[i];
-        if (map.count(complement)) {
-            return {map[complement], i};
-        }
-        map[nums[i]] = i;
-    }
-    return {};
-}`
-  };
-  
   // Initialize with JavaScript solution
   updateSolution(currentLanguage);
   
@@ -104,32 +59,30 @@ document.addEventListener('DOMContentLoaded', function() {
     solutionDisplay.classList.add('processing');
     solutionDisplay.textContent = 'Generating solution...';
     
-    // Map language ID to proper language name for the API
-    const languageMap = {
-      'js': 'javascript',
-      'python': 'python',
-      'java': 'java',
-      'cpp': 'c++'
-    };
-    
-    const apiLanguage = languageMap[language] || language;
+    const apiLanguage = language;
     
     // Create form data for the API request
     const formData = new FormData();
     // Get the problem text from the textarea
-    const problemText = problemTextArea.value.trim() || 'Two Sum: Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.';
+    const problemText = problemTextArea.value.trim() || 'No solution';
     formData.append('task', problemText);
     formData.append('programming_language', apiLanguage);
     
     // Make API call to the backend
     fetch('http://84.252.131.206:8000/upload', {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      mode: 'no-cors'
     })
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
+      console.log("response was ok ");
+      console.log(response);
       return response.json();
     })
     .then(data => {
@@ -147,9 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error fetching solution:', error);
       solutionDisplay.textContent = '// Error: Could not generate solution. Using fallback.';
       // Fallback to sample solutions if API call fails
-      if (sampleSolutions[language]) {
-        solutionDisplay.textContent = sampleSolutions[language];
-      }
     })
     .finally(() => {
       // Remove loading state
