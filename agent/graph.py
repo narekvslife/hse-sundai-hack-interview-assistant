@@ -16,7 +16,7 @@ load_dotenv()
 class State(MessagesState):
     initial_text: str = Field(default="")
 
-def build_agent_graph(self):
+def build_agent_graph():
 
     ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     model_name = os.environ.get("MODEL_NAME", "qwen2.5-coder:14b")
